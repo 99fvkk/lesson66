@@ -1,5 +1,5 @@
-import sqlite3
-db_connect = sqlite3.connect('project666.db')
+from repo import*
+db_connect = connect('project666.db')
 db_cursor = db_connect.cursor() 
 #h
 def create_table():
@@ -14,9 +14,8 @@ def create_table():
                       (id INTEGER PRIMARY KEY AUTOINCREMENT,
                       title TEXT NOT NULL,
                       author TEXT NOT NULL,
-                      genre INTEGER NOT NULL CHECK(total >=1),
-                      free INTEGER NOT NULL CHECK(free >= 0 and free <=total)
-                      )""")
+                      genre INTEGER NOT NULL,
+                      free INTEGER NOT NULL )""")
     db_cursor.execute("""CREATE TABLE IF NOT EXISTS loans 
                       (id INTEGER PRIMARY KEY AUTOINCREMENT,
                       pr TEXT NOT NULL REFERENCES readers(pr),
@@ -28,6 +27,14 @@ def create_table():
                       book_id INTEGER NOT NULL REFERENCES books(id),
                       date TEXT NOT NULL 
                       )""")
+   
+    print(db_cursor.fetchall())
+    
     db_connect.commit()
 create_table()
+
+delete_book(db_connect, "book1", "author1")
+
+db_cursor.execute('''INSERT INTO books VALUES (1, 'book1', 'author1', 1, 0)''')
+db_cursor.execute('''SELECT * FROM books''')
 db_connect.close()
