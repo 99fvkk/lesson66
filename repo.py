@@ -10,3 +10,4 @@ def delete_book(conn, title, author):
     cursor.execute('''SELECT * FROM books''')
     print(cursor.fetchall())
 
+

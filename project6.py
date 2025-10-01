@@ -27,14 +27,12 @@ def create_table():
                       book_id INTEGER NOT NULL REFERENCES books(id),
                       date TEXT NOT NULL 
                       )""")
-   
+    db_cursor.execute('''SELECT * FROM books''')
     print(db_cursor.fetchall())
-    
     db_connect.commit()
 create_table()
 
-delete_book(db_connect, "book1", "author1")
-
-db_cursor.execute('''INSERT INTO books VALUES (1, 'book1', 'author1', 1, 0)''')
-db_cursor.execute('''SELECT * FROM books''')
+#delete_book(connect("project666.db")
+#add_book()
+#hold_book()
 db_connect.close()
