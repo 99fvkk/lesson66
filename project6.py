@@ -32,8 +32,9 @@ def create_table():
     
     db_connect.commit()
 create_table()
-
-delete_book(db_connect, "book1", "author1")
+db_cursor.execute('''SELECT * FROM books''')
+print(db_cursor.fetchall())
+#delete_book(db_connect, "book1", "author1")
 
 db_cursor.execute('''INSERT INTO books VALUES (1, 'book1', 'author1', 1, 0)''')
 db_cursor.execute('''SELECT * FROM books''')
