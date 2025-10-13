@@ -1,25 +1,6 @@
 from sqlite3 import*
 from datetime import datetime
 
-def find_book(conn, title=None, author=None, genre=None):
-    cursor=conn.cursor()
-    query='''SELECT title, author, genre, total, free FROM books WHERE 1=1'''
-    params=[]
-    if title:
-        query1=''' AND LOWER(title)=LOWER(?)'''
-        params.append(title)
-        query=query+query1
-    if author:
-        query2=''' AND LOWER(author)=LOWER(?)'''
-        params.append(author)
-        query=query+query2
-    if genre:
-        query3=''' AND LOWER(genre)=LOWER(?)'''
-        params.append(genre)
-        query=query+query3
-    cursor.execute(query, params)
-    return True
-
 def borrow_book(conn, pr, title, author):
     cursor=conn.cursor()
     cursor.execute('''SELECT book_id, free FROM books WHERE title=? AND author=?''',
