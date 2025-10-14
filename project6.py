@@ -6,7 +6,6 @@ def create_table():
     db_cursor.execute("""CREATE TABLE IF NOT EXISTS readers
                       (pr TEXT PRIMARY KEY,
                       full_name TEXT NOT NULL,
-                      password TEXT NOT NULL,
                       phone TEXT NOT NULL,
                       age INTEGER NOT NULL
                       )""")
@@ -15,11 +14,13 @@ def create_table():
                       title TEXT NOT NULL,
                       author TEXT NOT NULL,
                       genre INTEGER NOT NULL,
+                      total INTEGER NOT NULL,
                       free INTEGER NOT NULL )""")
     db_cursor.execute("""CREATE TABLE IF NOT EXISTS loans 
                       (id INTEGER PRIMARY KEY AUTOINCREMENT,
                       pr TEXT NOT NULL REFERENCES readers(pr),
-                      book_id INTEGER NOT NULL REFERENCES books(id)
+                      book_id INTEGER NOT NULL REFERENCES books(id),
+                      date TEXT NOT NULL 
                      )""")
     db_cursor.execute("""CREATE TABLE IF NOT EXISTS holds
                       (id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,11 +35,5 @@ create_table()
 
 db_cursor.execute('''SELECT * FROM books''')
 print(db_cursor.fetchall())
-#delete_book(db_connect, "book1", "author1")
 
-
-
-#delete_book(connect("project666.db")
-#add_book()
-#hold_book()
 db_connect.close()
