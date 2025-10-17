@@ -76,7 +76,7 @@ def return_holds(conn, pr):
     for hold_item in holds_list:
         holds_return_small=[]
         cursor.execute('''SELECT title FROM books WHERE id=?''',
-                       (hold_item[0]))
+                       (hold_item[0],))
         holds_return_small.append(cursor.fetchone()[0])
         cursor.execute('''SELECT author FROM books WHERE id=?''',
                        (hold_item[0],))
