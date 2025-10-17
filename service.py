@@ -70,16 +70,16 @@ def overdue_list(conn):
 def return_holds(conn, pr):
     cursor=conn.cursor()
     cursor.execute('''SELECT book_id, date FROM holds WHERE pr=?''',
-                   (pr))
+                   (pr,))
     holds_list=cursor.fetchall()
     holds_return=[]
     for hold_item in holds_list:
         holds_return_small=[]
         cursor.execute('''SELECT title FROM books WHERE id=?''',
-                       (hold_item[0]))
+                       (hold_item[0],))
         holds_return_small.append(cursor.fetchone()[0])
         cursor.execute('''SELECT author FROM books WHERE id=?''',
-                       (hold_item[0]))
+                       (hold_item[0],))
         holds_return_small.append(cursor.fetchone()[0])
         holds_return_small.append(hold_item[1])
         holds_return_small.append(hold_item[1] + timedelta(days=5))
