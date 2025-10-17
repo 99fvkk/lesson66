@@ -55,23 +55,14 @@ def return_book(conn, pr, title, author):
     conn.commit()
 
 
-def get_loan_books(conn, pr):
-    cursor=conn.cursor()
-    cursor.execute("""SELECT * FROM loans where pr=?""",(pr,))
-    loans_pr = conn.fetchall()
-    return loans_pr
-
-
-def get_reader_holds(conn, pr):
-    cursor=conn.cursor()
-    cursor.execute("""SELECT * FROM holds where pr=?""",(pr,))
-    holds_pr = conn.fetchall()
-    return holds_pr
-
-
 def overdue_list(conn):
     cursor=conn.cursor()
-    today = date.today()
-    cursor.execute("SELECT pr,full_name, title, author,date_return FROM loans WHERE ((today = ?)-date)  > timedelta(days = 14)",(today,))
-    overdue = conn.fetchall()
+    cursor.execute('''SELECT loans.pr, readers.full_name, books.title, books.author, loans.date as date_borrowed,
+                    date(loans.date, '+14 days') as date_return
+                    FROM loans
+                    JOIN readers ON loans.pr=readers.pr 
+                    JOIN books ON loans.book_id=books.id 
+                    WHERE date('now') > date(loans.date, '+14 days')''',
+                    )
+    overdue = cursor.fetchall()
     return overdue

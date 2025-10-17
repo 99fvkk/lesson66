@@ -28,8 +28,6 @@ def create_table():
                       book_id INTEGER NOT NULL REFERENCES books(id),
                       date TEXT NOT NULL CHECK(date GLOB '[0-3][0-9]/[0-1][0-9]/[0-9][0-9]')
                       )""")
-    db_cursor.execute('''SELECT * FROM books''')
-    print(db_cursor.fetchall())
     db_connect.commit()
 create_table()
 
