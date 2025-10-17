@@ -66,3 +66,22 @@ def overdue_list(conn):
                     )
     overdue = cursor.fetchall()
     return overdue
+
+def find_book(conn, title, author, genre):
+    cursor=conn.cursor()
+    query='''SELECT title, author, genre, total, free FROM books WHERE 1=1'''
+    params=[]
+    if title:
+        query1=''' AND LOWER(title)=LOWER(?)'''
+        params.append(title)
+        query=query+query1
+    if author:
+        query2=''' AND LOWER(author)=LOWER(?)'''
+        params.append(author)
+        query=query+query2
+    if genre:
+        query3=''' AND LOWER(genre)=LOWER(?)'''
+        params.append(genre)
+        query=query+query3
+    cursor.execute(query, params)
+    return True
