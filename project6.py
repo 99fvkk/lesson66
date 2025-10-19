@@ -31,7 +31,7 @@ def create_table():
     db_connect.commit()
 create_table()
 
-db_cursor.execute('''SELECT * FROM books''')
-print(db_cursor.fetchall())
+#db_cursor.execute('''SELECT * FROM books''')
+#print(db_cursor.fetchall())
 
 #db_connect.close()
