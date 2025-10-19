@@ -103,3 +103,16 @@ def return_holds(conn, pr):
         holds_return_small.append(hold_item[1] + timedelta(days=5))
         holds_return.append(holds_return_small)
     return holds_return
+    
+def autocancel(conn):
+    cursor=conn.cursor()
+    today=datetime.now()
+    cursor.execute('''SELECT id, book_id, date FROM holds''')
+    holds_table=cursor.fetchall()
+    for hold_item in holds_table:
+        if today>=hold_item[2]+timedelta(days=5):
+            cursor.execute('''DELETE FROM holds WHERE id=?''',
+                           (hold_item[0]))
+            cursor.execute('''UPDATE books WHERE id=? SET free=free+1''',
+                           (hold_item[1]))
+    return True
