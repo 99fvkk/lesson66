@@ -3,6 +3,6 @@ from service import*
 from project6 import*
 
 
-overdue_list(db_connect)
+find_book(db_connect, "book_1", author=None, genre=None)
 print(db_cursor.fetchall())
 
