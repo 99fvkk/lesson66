@@ -23,7 +23,6 @@ def delete_book(conn, title, author):
     conn.commit()
     return True
 
-
 def delete_reader(conn, pr):
     cursor=conn.cursor()
     cursor.execute("""SELECT id FROM loans WHERE pr=?""", (pr,))    
