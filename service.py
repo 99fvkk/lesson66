@@ -1,47 +1,56 @@
 from sqlite3 import*
 from datetime import datetime, timedelta, date
 
-def hold_book(conn, pr , title, author, date):
-    cursor=conn.cursor()
-    cursor.execute("""SELECT id FROM books WHERE title=? AND author=? WHERE FREE > 0"""
-                   ,(title, author))
-    id_1=cursor.fetchall()
-    cursor.execute(f"""UPDATE books SET free-=1 WHERE id={id_1[0][0]}""")
-    cursor.execute('SELECT * FROM holds')
-    holds=cursor.fetchall()
-    cursor.execute("""INSERT INTO holds VALUES(id = ?, pr=?, book_id=?, date = ?)""",(len(holds)+1,  pr, id_1[0][0], date))
-    conn.commit()
-
+def hold_book(conn, pr, title, author):
+    cursor = conn.cursor()
+    cursor.execute("""SELECT COUNT(*) FROM holds WHERE pr=?""", (pr,))
+    current_holds_count = cursor.fetchone()[0]
+    if current_holds_count >= 5:
+        return False, "Превышен лимит бронирования (максимум 5 книг)"
+    
+    cursor.execute("""SELECT id FROM books WHERE title=? AND author=? AND free > 0""",
+                   (title, author))
+    book = cursor.fetchone()
+    if book:
+        book_id = book[0]
+        current_date = datetime.now().strftime("%d/%m/%y")
+        cursor.execute("""UPDATE books SET free = free - 1 WHERE id=?""", (book_id,))
+        cursor.execute("""INSERT INTO holds (pr, book_id, date) VALUES (?, ?, ?)""",
+                       (pr, book_id, current_date))
+        conn.commit()
+        return True, "Книга успешно забронирована"
+    else:
+        return False, "Книга недоступна для бронирования"
     
 def cancel_hold(conn, pr, title, author):
     cursor=conn.cursor()
-    cursor.execute(f"""SELECT id FROM books WHERE title={title}, author={author}""")
-    book_id=cursor.fetchall()
-    cursor.execute(f"""DELETE FROM holds WHERE id = {book_id[0][0]} AND pr={pr}""")
-    cursor.execute(f"""UPDATE books SET free+=1  WHERE title={title}, author={author}""")
+    cursor.execute("""SELECT id FROM books WHERE title=? AND author=?""", (title, author))
+    book_id=cursor.fetchone()[0]
+    print(book_id)
+    cursor.execute("""DELETE FROM holds WHERE book_id=? AND pr=?""", (book_id, pr))
+    cursor.execute("""UPDATE books SET free=free+1 WHERE title=? AND author=?""", (title, author))
     conn.commit()
 
 
 def borrow_book(conn, pr, title, author):
     cursor=conn.cursor()
-    cursor.execute("""SELECT book_id, free FROM books WHERE title=? AND author=?""", (title, author))
+    cursor.execute("""SELECT id, free FROM books WHERE title=? AND author=?""", (title, author))
     book_id, free = cursor.fetchone()
     if free==0:
         print('Вы не можете взять книгу')
         return False
-    cursor.execute("""SELECT id FROM holds WHERE pr=? AND book_id=?""", (pr, book_id))
-    cursor.execute("""SELECT COUNT(*) FROM loans WHERE pr=?""",(pr))
-    if cursor.fetchone()>=5:
+    cursor.execute("""SELECT COUNT(*) FROM loans WHERE pr=?""",(pr,))
+    count_loans=cursor.fetchone()[0]
+    if count_loans>=5:
         print('Читатель не может взять книгу т.к. у него более 5 активных броней')
         return False
-    if cursor.fetchone()[0]:
+    if count_loans:
         cursor.execute("""DELETE FROM holds WHERE pr=? AND book_id=?""",
                        (pr, book_id))
-    cursor.execute("""SELECT COUNT(*) FROM loans""")
-    id_1=cursor.fetchone()[0]+1
     current_date=datetime.now().strftime("%d/%m/%y")
-    cursor.execute("""INSERT INTO loans VALUES id=?, pr=?, book_id=?, date=?""",
-                   (id_1, pr, book_id, current_date))
+    cursor.execute("""INSERT INTO loans (pr, book_id, date) VALUES (?, ?, ?)""",
+                   (pr, book_id, current_date))
+    cursor.execute("""UPDATE books SET free=free-1 WHERE title=? AND author=?""", (title, author))
     conn.commit()
     return True
 
@@ -79,3 +88,27 @@ def autocancel(conn):
             cursor.execute('''UPDATE books WHERE id=? SET free=free+1''',
                            (hold_item[1]))
     return True
+
+def return_holds(conn, pr):
+    cursor=conn.cursor()
+    cursor.execute("""SELECT books.title, books.author, holds.date
+                      FROM holds 
+                      JOIN books ON holds.book_id=books.id
+                      WHERE holds.pr=?""", (pr,))
+    holds_items=cursor.fetchall()
+    holds_list=[]
+    for hold_item in holds_items:
+        holds_list.append([hold_item[0], hold_item[1], hold_item[2], datetime.strftime(datetime.strptime(hold_item[2], "%d/%m/%y")+timedelta(days=5), "%d/%m/%y")])
+    return holds_list
+
+def return_loans(conn, pr):
+    cursor=conn.cursor()
+    cursor.execute("""SELECT books.title, books.author, loans.date
+                      FROM loans
+                      JOIN books ON loans.book_id=books.id
+                      WHERE loans.pr=?""", (pr,))
+    loans_items=cursor.fetchall()
+    loans_list=[]
+    for loan_item in loans_items:
+        loans_list.append([loan_item[0], loan_item[1], loan_item[2], datetime.strftime(datetime.strptime(loan_item[2], "%d/%m/%y")+timedelta(days=14), "%d/%m/%y")])
+    return loans_list   

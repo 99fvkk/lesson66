@@ -1,8 +1,12 @@
 from sqlite3 import*
-db_connect = connect('project666.db')
-db_cursor = db_connect.cursor() 
-#h
+def connection(path="project666.db"):
+    db_connect = connect(path)
+    return db_connect
+    
+
 def create_table():
+    db_connect = connection()
+    db_cursor = db_connect.cursor()
     db_cursor.execute("""CREATE TABLE IF NOT EXISTS readers
                       (pr TEXT PRIMARY KEY,
                       full_name TEXT NOT NULL,
@@ -31,7 +35,5 @@ def create_table():
     db_connect.commit()
 create_table()
 
-db_cursor.execute('''SELECT * FROM books''')
-print(db_cursor.fetchall())
 
 #db_connect.close()

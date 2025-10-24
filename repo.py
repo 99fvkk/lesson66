@@ -2,23 +2,24 @@ from sqlite3 import*
 
 def delete_book(conn, title, author):
     cursor=conn.cursor()
-    cursor.execute("""SELECT id FROM books WHERE title=? AND author=?""", (title, author))
-    id_1=cursor.fetchone()
+    cursor.execute("""SELECT books.id, loans.id, holds.id FROM books 
+                   LEFT JOIN holds ON books.id=holds.book_id 
+                   LEFT JOIN loans ON books.id = loans.book_id 
+                   WHERE title=? AND author=?""", (title, author))
+    id_1=cursor.fetchall()
     if not id_1:
         print('Нельзя удалить книгу, ее нет в библиотеке')
         return False
     id_1=id_1[0]
-    cursor.execute("""SELECT id FROM loans WHERE id=?""", (id_1,))
-    loans_id=cursor.fetchone()
+    holds_id=id_1[1]
+    loans_id=id_1[2]
     if loans_id:
         print("нельзя удалить книгу: она выдана")
         return False
-    cursor.execute("""SELECT id FROM holds WHERE id=?""", (id_1,))
-    holds_id=cursor.fetchone()
     if holds_id:
         print("нельзя удалить книгу: она забронирована")
         return False
-    cursor.execute(f"""DELETE FROM books WHERE id = {id_1}""")
+    cursor.execute("""DELETE FROM books WHERE title=? AND author=?""", (title, author))
     print(f'книга {title} удалена')
     conn.commit()
     return True
@@ -51,18 +52,15 @@ def add_reader(conn, full_name, phone, age):
     
 def add_book(conn, title, author, genre, n):
     cursor=conn.cursor()
-    cursor.execute("""SELECT id FROM books WHERE title=? AND author=?""", (title, author))
-    book_id=cursor.fetchone()
-    if book_id:
-        cursor.execute("""SELECT total FROM books WHERE id=?""", (book_id[0]))
-        cur_total=cursor.fetchone()[0]
-        cursor.execute("""UPDATE books WHERE id=? SET total = ?""", (book_id[0], cur_total+n))
+    cursor.execute("""SELECT id, total, free FROM books WHERE title=? AND author=?""", (title, author))
+    book_item=cursor.fetchone()
+    if book_item:
+        book_id=book_item[0]
+        cur_total=book_item[1]
+        cur_free=book_item[2]
+        cursor.execute("""UPDATE books SET total = ?, free=? WHERE id=? """, (cur_total+n, cur_free+n, book_id))
         conn.commit()
         return True
-    cursor.execute("""SELECT MAX(id) FROM books""")
-    max_id=cursor.fetchone()[0]
-    if not max_id:
-        max_id=0
-    cursor.execute("""INSERT INTO books (id, title, author, genre, total, free) VALUES (?, ?, ?, ?, ?, ?)""", (max_id+1, title, author, genre, n, n))
+    cursor.execute("""INSERT INTO books (title, author, genre, total, free) VALUES (?, ?, ?, ?, ?)""", ( title, author, genre, n, n))
     conn.commit()
     return True
