@@ -36,4 +36,4 @@ def create_table():
 create_table()
 
 
-#db_connect.close()
+

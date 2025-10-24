@@ -1,3 +1,4 @@
+лешка(official), [24.10.2025 20:15]
 from sqlite3 import*
 from datetime import datetime, timedelta, date
 
@@ -89,6 +90,7 @@ def autocancel(conn):
                            (hold_item[1]))
     return True
 
+лешка(official), [24.10.2025 20:15]
 def return_holds(conn, pr):
     cursor=conn.cursor()
     cursor.execute("""SELECT books.title, books.author, holds.date
@@ -111,4 +113,4 @@ def return_loans(conn, pr):
     loans_list=[]
     for loan_item in loans_items:
         loans_list.append([loan_item[0], loan_item[1], loan_item[2], datetime.strftime(datetime.strptime(loan_item[2], "%d/%m/%y")+timedelta(days=14), "%d/%m/%y")])
-    return loans_list   
+    return loans_list
