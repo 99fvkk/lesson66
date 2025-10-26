@@ -50,7 +50,7 @@ def borrow_book(conn, pr, title, author):
     current_date=datetime.now().strftime("%d/%m/%y")
     db_cursor.execute("""INSERT INTO loans (pr, book_id, date) VALUES (?, ?, ?)""",
                    (pr, book_id, current_date))
-    db_cursor.execute("""UPDATE books SET free=free-1 WHERE title=? AND author=?""", (title, author))
+    db_cursor.execute("""UPDATE books SET free-=1 WHERE title=? AND author=?""", (title, author))
     conn.commit()
     return True
 
