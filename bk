@@ -1,0 +1,133 @@
+class GraphMatrix:
+    def __init__(self,direction):
+        self.vertex = []
+        self.matrix = []
+        self.direction = direction
+
+    def add_node(self, vertex):
+        if vertex in self.vertex:
+            return 
+        
+        self.vertex.append(vertex)
+
+        for row in self.matrix:
+            row.append(0)
+
+        self.matrix.append([0] * len(self.vertex))
+
+    def add_edge(self, a, b, w = 1):
+        self.add_edge(a)
+        self.add_edge(b)
+
+        ind_a = self.vertex.index(a)
+        ind_b = self.vertex.index(b)
+        
+        self.matrix[ind_a][ind_b] = w
+        if not self.direction:
+            self.matrix[ind_b][ind_a] = w
+    def print_graph(self):
+        for row in self.matrix:
+            print(*row)
+
+    def dfs(self, start, finish) -> bool:
+        if start not in self.vertex or finish not in self.vertex:
+            return False
+        
+        visited = set()
+        prev = {start: None}
+
+        def _dfs(vertex):
+            visited.add(vertex)
+            if vertex == finish:
+                return True
+            
+            i = self.vertex.index(vertex)
+            for j in range(len(self.vertex)):
+                if self.matrix[i][j] != 0:
+                    to = self.vertex[j]
+                    if to not in visited:
+                        prev[to] = vertex
+                        if _dfs(to):
+                            return True
+            return False
+        if not _dfs(start, finish):
+            return None
+
+        path = []
+        cur = finish
+        while cur:
+            path.append(cur)
+            cur = prev[cur]
+        path.reverse()
+        return path
+
+
+graph = GraphMatrix(False)
+graph.add_edge("A", "B", 4)
+graph.add_edge("A", "C", 6)
+graph.add_edge("B", "C", 6)
+graph.print_graph()
+
+
+
+
+
+
+
+
+
+from collections import deque
+
+class GraphList:
+    def __init__(self,direction):
+        self.graph = {}
+        self.direction = direction
+
+    def add_node(self, vertex):
+        if vertex not in self.graph:
+            self.graph[vertex] = []
+
+    def add_edge(self, a, b, w=1):
+        self.add_node(a)
+        self.add_node(b)
+        
+        self.graph[a].append((b, w))
+        if not self.direction:
+            self.graph[b].append((a,w))
+
+    def print_graph(self):
+        for k, v, in self.graph.items():
+            print(k, v)
+        
+    def bfs(self, start, finish):
+        if start not in self.graph or finish not in self.graph:
+            return None 
+    
+        q = deque([start])
+        prev = {start: None}
+
+        while q:
+            vertex = q.popleft()
+            if vertex == finish:
+                break
+
+            for to, w in self.graph[vertex]:
+                if to not in prev:
+                    prev[to] = vertex
+                    q.append(to)
+
+        if finish not in prev:
+            return None
+
+
+graph = GraphList(False)
+graph.add_edge("A", "B", 4)
+graph.add_edge("A", "C", 6)
+graph.add_edge("B", "C", 6)
+graph.print_graph()
+
+
+
+
+
+ 
