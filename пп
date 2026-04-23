@@ -1,0 +1,199 @@
+#include <SDL2/SDL.h>
+#include <ctime>
+#include <cstdlib>
+
+const int WIDTH = 800;
+const int HEIGHT = 600;
+const int FLAG_W = 60;
+const int FLAG_H = 40;
+
+struct Flag {
+    int x, y;
+    int country;
+    bool active;
+};
+
+Flag flags[100];
+int flagCount = 0;
+
+void drawFlag(SDL_Renderer* renderer, int x, int y, int country) {
+    SDL_Rect rect = {x, y, FLAG_W, FLAG_H/3};
+    
+    switch(country) {
+        case 0: // Россия - белый, синий, красный
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            rect.y += FLAG_H/3;
+            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            rect.y += FLAG_H/3;
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            break;
+            
+        case 1: // Франция - синий, белый, красный
+            rect.w = FLAG_W/3;
+            rect.h = FLAG_H;
+            rect.y = y;
+            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            rect.x += FLAG_W/3;
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            rect.x += FLAG_W/3;
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            break;
+            
+        case 2: // Япония - белый с красным кругом
+            rect.y = y;
+            rect.w = FLAG_W;
+            rect.h = FLAG_H;
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            for(int i = 0; i < 360; i++) {
+                SDL_RenderDrawPoint(renderer, x + FLAG_W/2 + 10 * cos(i * 3.14/180), 
+                                   y + FLAG_H/2 + 10 * sin(i * 3.14/180));
+            }
+            break;
+            
+        case 3: // Германия - черный, красный, желтый
+            rect.y = y;
+            rect.w = FLAG_W;
+            rect.h = FLAG_H/3;
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            rect.y += FLAG_H/3;
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            rect.y += FLAG_H/3;
+            SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            break;
+            
+        case 4: // Италия - зеленый, белый, красный
+            rect.w = FLAG_W/3;
+            rect.h = FLAG_H;
+            rect.y = y;
+            SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            rect.x += FLAG_W/3;
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            rect.x += FLAG_W/3;
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            break;
+            
+        case 5: // Польша - белый, красный
+            rect.y = y;
+            rect.w = FLAG_W;
+            rect.h = FLAG_H/2;
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            rect.y += FLAG_H/2;
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            break;
+            
+        case 6: // Украина - синий, желтый
+            rect.y = y;
+            rect.w = FLAG_W;
+            rect.h = FLAG_H/2;
+            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            rect.y += FLAG_H/2;
+            SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            break;
+            
+        case 7: // Нидерланды - красный, белый, синий
+            rect.y = y;
+            rect.w = FLAG_W;
+            rect.h = FLAG_H/3;
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            rect.y += FLAG_H/3;
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            rect.y += FLAG_H/3;
+            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            break;
+            
+        case 8: // Бельгия - черный, желтый, красный
+            rect.w = FLAG_W/3;
+            rect.h = FLAG_H;
+            rect.y = y;
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            rect.x += FLAG_W/3;
+            SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            rect.x += FLAG_W/3;
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            break;
+            
+        case 9: // Швейцария - красный с белым крестом
+            rect.y = y;
+            rect.w = FLAG_W;
+            rect.h = FLAG_H;
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            SDL_Rect cross1 = {x + FLAG_W/2 - 3, y + FLAG_H/2 - 10, 6, 20};
+            SDL_RenderFillRect(renderer, &cross1);
+            SDL_Rect cross2 = {x + FLAG_W/2 - 10, y + FLAG_H/2 - 3, 20, 6};
+            SDL_RenderFillRect(renderer, &cross2);
+            break;
+    }
+}
+
+int main(int argc, char* argv[]) {
+    srand(time(NULL));
+    
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_Window* window = SDL_CreateWindow("Flags", 
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, 0);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
+    
+    bool running = true;
+    SDL_Event event;
+    
+    while(running) {
+        while(SDL_PollEvent(&event)) {
+            if(event.type == SDL_QUIT) {
+                running = false;
+            }
+            if(event.type == SDL_MOUSEBUTTONDOWN) {
+                if(flagCount < 100) {
+                    flags[flagCount].x = event.button.x - FLAG_W/2;
+                    flags[flagCount].y = event.button.y - FLAG_H/2;
+                    flags[flagCount].country = rand() % 10;
+                    flags[flagCount].active = true;
+                    flagCount++;
+                }
+            }
+        }
+        
+        SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+        SDL_RenderClear(renderer);
+        
+        for(int i = 0; i < flagCount; i++) {
+            if(flags[i].active) {
+                drawFlag(renderer, flags[i].x, flags[i].y, flags[i].country);
+            }
+        }
+        
+        SDL_RenderPresent(renderer);
+        SDL_Delay(16);
+    }
+    
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+    
+    return 0;
+}
